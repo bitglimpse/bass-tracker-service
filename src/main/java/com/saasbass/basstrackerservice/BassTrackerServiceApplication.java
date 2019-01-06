@@ -29,8 +29,10 @@ public class BassTrackerServiceApplication {
     @Bean
     public CommandLineRunner run(LakeProfileClient lakeProfileClient) throws Exception {
         return args -> {
-            lakeProfileClient.createLakeProfile(
-                    new LakeProfile(1L, "Strawberry Reservoir", "Utah", 40.175397, -111.102157));
+            new Thread(() -> {
+                lakeProfileClient.createLakeProfile(
+                        new LakeProfile(1L, "Strawberry Reservoir", "Utah", 40.175397, -111.102157));
+            }).start();
 
             Thread.sleep(3000);
 
