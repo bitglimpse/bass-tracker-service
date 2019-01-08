@@ -60,11 +60,11 @@ public class LakeProfile {
 
     @Override
     public String toString() {
-        return "\n" + "--Lake Profile--" + "\n"
-                + "Id: " + this.id + "\n"
-                + "Name: " + this.name + "\n"
-                + "State: " + this.state + "\n"
-                + "Latitude: " + this.latitude + "\n"
-                + "Longitude: " + this.longitude + "\n";
+        return "Lake Profile ="
+                + " Id: " + this.id
+                + ", Name: " + this.name
+                + ", State: " + this.state
+                + ", Latitude: " + this.latitude
+                + ", Longitude: " + this.longitude;
     }
 }
