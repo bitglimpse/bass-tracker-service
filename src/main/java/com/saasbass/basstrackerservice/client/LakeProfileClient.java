@@ -1,14 +1,15 @@
 package com.saasbass.basstrackerservice.client;
 
-import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
 public class LakeProfileClient {
     private RestTemplate restTemplate;
     private String lakeProfileServiceBaseUrl;
 
-    public LakeProfileClient(RestTemplateBuilder builder, String lakeProfileServiceBaseUrl) {
-        this.restTemplate = builder.build();
+    public LakeProfileClient(HttpComponentsClientHttpRequestFactory clientFactory,
+                             String lakeProfileServiceBaseUrl) {
+        this.restTemplate = new RestTemplate(clientFactory);
         this.lakeProfileServiceBaseUrl = lakeProfileServiceBaseUrl;
     }
 

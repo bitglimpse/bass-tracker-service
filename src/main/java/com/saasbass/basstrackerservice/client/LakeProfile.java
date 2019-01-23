@@ -18,6 +18,8 @@ public class LakeProfile {
         this.longitude = longitude;
     }
 
+    public LakeProfile() {}
+
     public Long getId() {
         return id;
     }

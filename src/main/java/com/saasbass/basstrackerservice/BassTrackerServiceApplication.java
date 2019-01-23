@@ -8,8 +8,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 
 @SpringBootApplication
 public class BassTrackerServiceApplication {
@@ -21,13 +21,22 @@ public class BassTrackerServiceApplication {
     }
 
     @Bean
-    public LakeProfileClient lakeProfileClient(RestTemplateBuilder builder,
-                                               @Value("${lakeProfileServiceBaseUrl}") String lakeProfileServiceBaseUrl) {
-        return new LakeProfileClient(builder, lakeProfileServiceBaseUrl);
+    public LakeProfileClient lakeProfileClient(@Value("${lakeProfileServiceBaseUrl}") String lakeProfileServiceBaseUrl,
+                                               @Value("${connectTimeout}") int clientConnectTimeout,
+                                               @Value("${readTimeout}") int clientReadTimeout) {
+        return new LakeProfileClient(clientFactory(clientConnectTimeout, clientReadTimeout),
+                lakeProfileServiceBaseUrl);
+    }
+
+    private HttpComponentsClientHttpRequestFactory clientFactory(int clientConnectTimeout, int clientReadTimeout) {
+        HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        factory.setReadTimeout(clientReadTimeout);
+        factory.setConnectTimeout(clientConnectTimeout);
+        return factory;
     }
 
     @Bean
-    public CommandLineRunner run(LakeProfileClient lakeProfileClient) throws Exception {
+    public CommandLineRunner run(LakeProfileClient lakeProfileClient) {
         return args -> {
             new Thread(() -> {
                 lakeProfileClient.createLakeProfile(
