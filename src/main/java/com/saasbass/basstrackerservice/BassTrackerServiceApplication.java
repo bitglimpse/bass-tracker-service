@@ -34,7 +34,9 @@ public class BassTrackerServiceApplication {
                         new LakeProfile(1L, "Strawberry Reservoir", "Utah", 40.175397, -111.102157));
             }).start();
 
-            Thread.sleep(3000);
+            // This simulates a resource race condition caused by the GET request
+            // for a resource executing before the POST request has created the resource.
+            //Thread.sleep(3000);
 
             LakeProfile strawberryLake = lakeProfileClient.getLakeProfile(1L);
             log.info(strawberryLake.toString());
