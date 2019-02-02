@@ -10,6 +10,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.retry.support.RetryTemplate;
 
 @SpringBootApplication
 public class BassTrackerServiceApplication {
@@ -21,11 +22,17 @@ public class BassTrackerServiceApplication {
     }
 
     @Bean
+    RetryTemplate retryTemplate() {
+        return new RetryTemplate();
+    }
+
+    @Bean
     public LakeProfileClient lakeProfileClient(@Value("${lakeProfileServiceBaseUrl}") String lakeProfileServiceBaseUrl,
                                                @Value("${connectTimeout}") int clientConnectTimeout,
-                                               @Value("${readTimeout}") int clientReadTimeout) {
+                                               @Value("${readTimeout}") int clientReadTimeout,
+                                               RetryTemplate retryTemplate) {
         return new LakeProfileClient(clientFactory(clientConnectTimeout, clientReadTimeout),
-                lakeProfileServiceBaseUrl);
+                lakeProfileServiceBaseUrl, retryTemplate);
     }
 
     private HttpComponentsClientHttpRequestFactory clientFactory(int clientConnectTimeout, int clientReadTimeout) {
