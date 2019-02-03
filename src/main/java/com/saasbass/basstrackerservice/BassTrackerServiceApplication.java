@@ -10,6 +10,9 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.backoff.FixedBackOffPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 
 @SpringBootApplication
@@ -22,8 +25,26 @@ public class BassTrackerServiceApplication {
     }
 
     @Bean
-    RetryTemplate retryTemplate() {
-        return new RetryTemplate();
+    RetryTemplate retryTemplate(@Value("${retry.fixed.backoffPeriod}") int fixedBackoffPeriod,
+                                @Value("${retry.exponential.initialBackoffInterval}") int expInitialBackoffInterval,
+                                @Value("${retry.exponential.maxBackoffInterval}") int expMaxBackoffInterval,
+                                @Value("${retry.exponential.backoffMultiplier}") double expBackoffMultiplier,
+                                @Value("${retry.maxAttempts}") int maxRetryAttempts) {
+        SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(maxRetryAttempts);
+
+        FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
+        fixedBackOffPolicy.setBackOffPeriod(fixedBackoffPeriod);
+
+        ExponentialBackOffPolicy exponentialBackOffPolicy = new ExponentialBackOffPolicy();
+        exponentialBackOffPolicy.setInitialInterval(expInitialBackoffInterval);
+        exponentialBackOffPolicy.setMaxInterval(expMaxBackoffInterval);
+        exponentialBackOffPolicy.setMultiplier(expBackoffMultiplier);
+
+        RetryTemplate template = new RetryTemplate();
+        template.setRetryPolicy(retryPolicy);
+        template.setBackOffPolicy(exponentialBackOffPolicy);
+
+        return template;
     }
 
     @Bean
