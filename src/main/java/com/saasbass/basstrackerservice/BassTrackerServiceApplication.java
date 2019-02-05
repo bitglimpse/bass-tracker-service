@@ -42,7 +42,7 @@ public class BassTrackerServiceApplication {
 
         RetryTemplate template = new RetryTemplate();
         template.setRetryPolicy(retryPolicy);
-        template.setBackOffPolicy(exponentialBackOffPolicy);
+        template.setBackOffPolicy(fixedBackOffPolicy);
 
         return template;
     }
@@ -74,8 +74,17 @@ public class BassTrackerServiceApplication {
 
             Thread.sleep(3000);
 
-            LakeProfile strawberryLake = lakeProfileClient.getLakeProfile(1L);
-            log.info(strawberryLake.toString());
+            long startTime = System.currentTimeMillis();
+            try {
+                LakeProfile strawberryLake = lakeProfileClient.getLakeProfile(1L);
+                log.info(strawberryLake.toString());
+            }
+            catch (Exception e) {
+                log.info("--- Total getLakeProfile duration: "
+                        + (System.currentTimeMillis() - startTime) + " milliseconds");
+                throw e;
+            }
+
         };
     }
 }

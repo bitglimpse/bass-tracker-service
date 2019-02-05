@@ -12,8 +12,6 @@ public class LakeProfileClient {
     private String lakeProfileServiceBaseUrl;
     private RetryTemplate retryTemplate;
     private static final Logger log = LoggerFactory.getLogger(BassTrackerServiceApplication.class);
-    private long lastMillis = System.currentTimeMillis();
-    private boolean isFirstRequest = true;
 
     public LakeProfileClient(HttpComponentsClientHttpRequestFactory clientFactory,
                              String lakeProfileServiceBaseUrl,
@@ -26,11 +24,7 @@ public class LakeProfileClient {
     public LakeProfile getLakeProfile(Long id) {
         String url = lakeProfileServiceBaseUrl + "/lake-profile/" + id;
         return retryTemplate.execute(context -> {
-            long currentTime = System.currentTimeMillis();
-            log.info("--- Get lake profile attempt ---" + (!isFirstRequest ?
-                    " backoff duration: " + (currentTime - lastMillis) + " milliseconds" : ""));
-            lastMillis = currentTime;
-            isFirstRequest = false;
+            log.info("--- Get lake profile attempt ---");
 
             return restTemplate.getForObject(url, LakeProfile.class);
         });
