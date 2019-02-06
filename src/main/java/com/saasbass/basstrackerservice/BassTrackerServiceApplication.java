@@ -14,6 +14,12 @@ import org.springframework.retry.backoff.ExponentialBackOffPolicy;
 import org.springframework.retry.backoff.FixedBackOffPolicy;
 import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.HttpServerErrorException;
+import org.springframework.web.client.RestClientException;
+
+import java.util.HashMap;
+import java.util.Map;
 
 @SpringBootApplication
 public class BassTrackerServiceApplication {
@@ -30,7 +36,15 @@ public class BassTrackerServiceApplication {
                                 @Value("${retry.exponential.maxBackoffInterval}") int expMaxBackoffInterval,
                                 @Value("${retry.exponential.backoffMultiplier}") double expBackoffMultiplier,
                                 @Value("${retry.maxAttempts}") int maxRetryAttempts) {
-        SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(maxRetryAttempts);
+
+        Map<Class<? extends Throwable>, Boolean> retryableExceptions = new HashMap<>();
+        retryableExceptions.put(RestClientException.class, true); // HTTP 404, 503, etc.
+
+        // Retry exception blacklist
+        retryableExceptions.put(HttpClientErrorException.BadRequest.class, false); // HTTP 400
+        retryableExceptions.put(HttpServerErrorException.InternalServerError.class, false); // HTTP 500
+
+        SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(maxRetryAttempts, retryableExceptions);
 
         FixedBackOffPolicy fixedBackOffPolicy = new FixedBackOffPolicy();
         fixedBackOffPolicy.setBackOffPeriod(fixedBackoffPeriod);
@@ -74,8 +88,15 @@ public class BassTrackerServiceApplication {
 
             Thread.sleep(3000);
 
-            LakeProfile strawberryLake = lakeProfileClient.getLakeProfile(1L);
-            log.info(strawberryLake.toString());
+            try {
+                LakeProfile strawberryLake = lakeProfileClient.getLakeProfile(1L);
+                log.info(strawberryLake.toString());
+            }
+            catch (Exception e) {
+                log.info("--- Exception is: " + e.toString());
+                throw e;
+            }
+
         };
     }
 }
