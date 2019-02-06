@@ -88,15 +88,8 @@ public class BassTrackerServiceApplication {
 
             Thread.sleep(3000);
 
-            try {
-                LakeProfile strawberryLake = lakeProfileClient.getLakeProfile(1L);
-                log.info(strawberryLake.toString());
-            }
-            catch (Exception e) {
-                log.info("--- Exception is: " + e.toString());
-                throw e;
-            }
-
+            LakeProfile strawberryLake = lakeProfileClient.getLakeProfile(1L);
+            log.info(strawberryLake.toString());
         };
     }
 }
