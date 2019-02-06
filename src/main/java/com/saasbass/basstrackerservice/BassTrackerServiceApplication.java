@@ -43,6 +43,7 @@ public class BassTrackerServiceApplication {
         // Retry exception blacklist
         retryableExceptions.put(HttpClientErrorException.BadRequest.class, false); // HTTP 400
         retryableExceptions.put(HttpServerErrorException.InternalServerError.class, false); // HTTP 500
+        //retryableExceptions.put(ResourceAccessException.class, false); // Read and connect exceptions
 
         SimpleRetryPolicy retryPolicy = new SimpleRetryPolicy(maxRetryAttempts, retryableExceptions);
 
@@ -88,8 +89,17 @@ public class BassTrackerServiceApplication {
 
             Thread.sleep(3000);
 
-            LakeProfile strawberryLake = lakeProfileClient.getLakeProfile(1L);
-            log.info(strawberryLake.toString());
+            long startTime = System.currentTimeMillis();
+            try {
+                LakeProfile strawberryLake = lakeProfileClient.getLakeProfile(1L);
+                log.info(strawberryLake != null ? strawberryLake.toString(): null);
+            }
+            catch (Exception e) {
+                log.info("--- Total getLakeProfile duration: "
+                        + (System.currentTimeMillis() - startTime) + " milliseconds");
+                log.info("--- Exception is: " + e.toString());
+                throw e;
+            }
         };
     }
 }

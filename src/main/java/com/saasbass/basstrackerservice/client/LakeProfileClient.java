@@ -1,11 +1,16 @@
 package com.saasbass.basstrackerservice.client;
 
 import com.saasbass.basstrackerservice.BassTrackerServiceApplication;
+import org.apache.http.conn.ConnectTimeoutException;
+import org.apache.http.conn.HttpHostConnectException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.retry.support.RetryTemplate;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+
+import java.net.SocketTimeoutException;
 
 public class LakeProfileClient {
     private RestTemplate restTemplate;
@@ -32,7 +37,23 @@ public class LakeProfileClient {
             lastMillis = currentTime;
             isFirstRequest = false;
 
-            return restTemplate.getForObject(url, LakeProfile.class);
+            LakeProfile lakeProfile = null;
+            try {
+                lakeProfile = restTemplate.getForObject(url, LakeProfile.class);
+            }
+            catch (ResourceAccessException e) {
+                if (e.getCause() instanceof HttpHostConnectException) {
+                    throw e;
+                }
+                if (e.getCause() instanceof ConnectTimeoutException) {
+                    throw e;
+                }
+                if (e.getCause() instanceof SocketTimeoutException) {
+                    //log.error("--- Error: Took too long to get lake profile! ---");
+                    throw e;
+                }
+            }
+            return lakeProfile;
         });
     }
 
