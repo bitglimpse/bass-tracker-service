@@ -15,11 +15,13 @@ public class LakeProfileClient {
 
     public LakeProfile getLakeProfile(Long id) {
         String url = lakeProfileServiceBaseUrl + "/lake-profile/" + id;
+        log.info("--- Get lake profile attempt ---");
         return restTemplate.getForObject(url, LakeProfile.class);
     }
 
     public void createLakeProfile(LakeProfile lakeProfile) {
         String url = lakeProfileServiceBaseUrl + "/lake-profile";
+        log.info("--- Create lake profile attempt ---");
         restTemplate.postForObject(url, lakeProfile, LakeProfile.class);
     }
 }
