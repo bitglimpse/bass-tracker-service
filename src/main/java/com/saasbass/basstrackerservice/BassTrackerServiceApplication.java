@@ -41,6 +41,7 @@ public class BassTrackerServiceApplication {
             new Thread(() -> {
                 lakeProfileClient.createLakeProfile(
                         new LakeProfile(1L, "Strawberry Reservoir", "Utah", 40.175397, -111.102157));
+                log.info("--- Success! Create lake profile attempt was successful ---");
             }).start();
 
             Thread.sleep(3000);
